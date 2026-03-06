@@ -1,7 +1,8 @@
+import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import { config as configDotenv } from "dotenv";
 import { readFilesTool } from "./tools/readFiles.js";
-import { AIMessageChunk, BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages";
+import { handleToolsCall } from "./utils/handleTools.js";
 
 configDotenv();
 
@@ -28,47 +29,11 @@ const message = [
 let response = await chatWithTools.invoke(message);
 message.push(response);
 
-const handleToolsCall = async (response: AIMessageChunk) => {
-	// 如果响应中包含工具调用，则执行工具并将结果添加到消息中，然后继续获取响应，直到没有工具调用为止
-	while (response?.tool_calls && response?.tool_calls?.length) {
-		// 获取调用的工具和参数
-		const toolCalls = response?.tool_calls || [];
-		const toolMessages = await Promise.all(
-			toolCalls.map(async (call) => {
-				console.log(`调用了工具: ${call.name}`);
-				console.log(`参数: ${JSON.stringify(call.args)}`);
-
-				const tool = tools.find((tool) => tool.name === call.name);
-
-				if (!tool) {
-					return new ToolMessage({
-						content: `未找到工具: ${call.name}`,
-						tool_call_id: call.id ?? "",
-					});
-				}
-
-				const result = await tool.invoke(call);
-				console.log(`工具 ${call.name} 的结果: ${result}`);
-				if (result instanceof ToolMessage) {
-					return result;
-				}
-				return new ToolMessage({
-					content: typeof result === "string" ? result : JSON.stringify(result),
-					tool_call_id: call.id ?? "",
-				});
-			}),
-		);
-
-		// 将工具结果添加到响应中
-		message.push(...toolMessages);
-
-		response = await chatWithTools.invoke(message);
-		message.push(response);
-	}
-
-	return response;
-};
-
-response = await handleToolsCall(response);
+response = await handleToolsCall({
+	client: chatWithTools,
+	message,
+	tools,
+	response: response,
+});
 
 console.log(response?.content);
