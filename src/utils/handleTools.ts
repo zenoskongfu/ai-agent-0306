@@ -30,7 +30,7 @@ export const handleToolsCall = async (props: {
 				}
 
 				const result = await tool.invoke(call);
-				console.log(`工具 ${call.name} 的结果: ${result}`);
+				console.log(`调用工具 ${call.name} 的结束`);
 				if (result instanceof ToolMessage) {
 					return result;
 				}

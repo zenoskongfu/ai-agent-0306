@@ -15,19 +15,24 @@ async function exists(path: string) {
 
 // read files
 const readFiles = async ({ filePath }: { filePath: string }) => {
-	const fullPath = resolve(process.cwd(), filePath);
-	// 判断文件是否存在
-	if (!(await exists(fullPath))) {
-		return `文件 ${fullPath} 不存在`;
-	}
-	// 判断是否是文件
-	if (!(await fs.stat(fullPath)).isFile()) {
-		return `${fullPath} 不是一个文件`;
-	}
+	try {
+		console.log("[工具调用] 正在读取文件:", filePath);
+		const fullPath = resolve(process.cwd(), filePath);
+		// 判断文件是否存在
+		if (!(await exists(fullPath))) {
+			return `文件 ${fullPath} 不存在`;
+		}
+		// 判断是否是文件
+		if (!(await fs.stat(fullPath)).isFile()) {
+			return `${fullPath} 不是一个文件`;
+		}
 
-	// 读取文件内容
-	const content = await fs.readFile(fullPath, "utf-8");
-	return content;
+		// 读取文件内容
+		const content = await fs.readFile(fullPath, "utf-8");
+		return content;
+	} catch (error) {
+		return `读取文件 ${filePath} 时发生错误: ${error}`;
+	}
 };
 
 const readFilesToolDesc = {
