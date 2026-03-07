@@ -1,6 +1,7 @@
 import { AIMessageChunk, BaseMessage, ToolMessage } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
 import { DynamicStructuredTool } from "@langchain/core/tools";
+import chalk from "chalk";
 
 export const handleToolsCall = async (props: {
 	response: AIMessageChunk;
@@ -17,8 +18,8 @@ export const handleToolsCall = async (props: {
 		const toolCalls = response?.tool_calls || [];
 		const toolMessages = await Promise.all(
 			toolCalls.map(async (call) => {
-				console.log(`调用了工具: ${call.name}`);
-				console.log(`参数: ${JSON.stringify(call.args)}`);
+				console.log(chalk.green(`调用了工具: ${call.name}`));
+				console.log(chalk.green(`调用工具 ${call.name} 的参数: ${JSON.stringify(call.args)}`));
 
 				const tool = tools.find((tool) => tool.name === call.name);
 
@@ -30,7 +31,7 @@ export const handleToolsCall = async (props: {
 				}
 
 				const result = await tool.invoke(call);
-				console.log(`调用工具 ${call.name} 的结束`);
+				console.log(chalk.green(`调用工具 ${call.name} 的结束`));
 				if (result instanceof ToolMessage) {
 					return result;
 				}
