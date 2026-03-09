@@ -19,7 +19,7 @@ export const handleToolsCall = async (props: {
 		const toolMessages = await Promise.all(
 			toolCalls.map(async (call) => {
 				console.log(chalk.green(`调用了工具: ${call.name}`));
-				console.log(chalk.green(`调用工具 ${call.name} 的参数: ${JSON.stringify(call.args)}`));
+				console.log(chalk.green(`调用工具 ${call.name} 的参数: ${JSON.stringify(call.args).slice(0, 100)}`)); // 只打印前100个字符，避免参数过长导致日志混乱
 
 				const tool = tools.find((tool) => tool.name === call.name);
 
@@ -30,6 +30,7 @@ export const handleToolsCall = async (props: {
 					});
 				}
 
+				// 调用工具，调用函数的实际动作
 				const result = await tool.invoke(call);
 				console.log(chalk.green(`调用工具 ${call.name} 的结束`));
 				if (result instanceof ToolMessage) {
