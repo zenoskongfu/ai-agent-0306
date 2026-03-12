@@ -59,14 +59,14 @@ mcpServer.registerResource(
 					type: "text",
 					text: `欢迎使用数据库服务器！这是一个简单的示例，展示了如何根据用户ID查询用户信息。您可以调用工具 "query-user-by-id" 并传入一个用户ID来获取相应的用户信息。例如：
 
-                工具名称: query-user-by-id
-                输入参数: { "userId": "1" }
+工具名称: query-user-by-id
+输入参数: { "userId": "1" }
 
-                这将返回用户ID为1的用户信息。您可以尝试不同的用户ID来查询其他用户的信息。
-								同样的，您也可以调用工具 "query-cart-by-user-id" 来查询用户的购物车信息。例如：
+这将返回用户ID为1的用户信息。您可以尝试不同的用户ID来查询其他用户的信息。
+同样的，您也可以调用工具 "query-cart-by-user-id" 来查询用户的购物车信息。例如：
 
-								工具名称: query-cart-by-user-id
-								输入参数: { "userId": "1" }
+工具名称: query-cart-by-user-id
+输入参数: { "userId": "1" }
 										`,
 				},
 			],

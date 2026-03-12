@@ -2,7 +2,7 @@ import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messag
 import { ChatOpenAI } from "@langchain/openai";
 import { config as configDotenv } from "dotenv";
 import { databaseMcpClient } from "./mcp/Database/client.js";
-import { handleToolsCall } from "./utils/index.js";
+import { handleToolsCall, getClientResource } from "./utils/index.js";
 
 configDotenv();
 
@@ -28,12 +28,13 @@ const runAgentWithTools = async (query: string, maxRetries = 30) => {
 		
 		当前工作目录：${process.cwd()}
 
-		你可以使用以下工具：
-		${tools.map((tool) => `- ${tool.name}: ${tool.description}，参数格式: ${JSON.stringify(tool.description)}`).join("\n")}
+    当前可用的资源有：\n
+		${await getClientResource(databaseMcpClient)}
 		`),
-		// 提问路径，一般相对于workspace Root目录, 而workspace Root目录一般是执行命令的目录
 		new HumanMessage(query),
 	] as BaseMessage[];
+
+	console.log(message[0].content);
 
 	// 获取响应
 	let response = await chatWithTools.invoke(message);
