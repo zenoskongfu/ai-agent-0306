@@ -17,8 +17,6 @@ const chat = new ChatOpenAI({
 	},
 });
 
-// const tools = [readFilesTool, listDirTool, writeFilesTool, runCommandTool] as DynamicStructuredTool[];
-
 const tools = await databaseMcpClient.getTools();
 
 const chatWithTools = chat.bindTools(tools);
@@ -52,7 +50,9 @@ const runAgentWithTools = async (query: string, maxRetries = 30) => {
 };
 
 const case1 = `
-  先帮我看下有哪些tools，帮我看下用户ID为1的用户信息和购物车信息。
+  先帮我看下有哪些tools。然后帮我看下用户ID为1的用户信息和购物车信息
 `;
 
-runAgentWithTools(case1);
+await runAgentWithTools(case1);
+
+databaseMcpClient.close();
