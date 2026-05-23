@@ -3,11 +3,16 @@ import { globalEnv } from "../env.js";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import "cheerio";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import CustomPDFLoader from "./PDFLoader.js";
 import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const outputFilePath = path.resolve(currentDir, "documents.json");
 
 const chat = new ChatOpenAI({
 	model: globalEnv.model,
@@ -35,6 +40,9 @@ const loader = new CustomPDFLoader(path.resolve(globalEnv.srcDir, "./rag/va.pdf"
 
 const documents = await loader.load();
 
+await writeFile(outputFilePath, JSON.stringify(documents, null, 2), "utf-8");
+console.log(`documents 已写入: ${outputFilePath}`);
+
 // 视情况区分文本片段的粒度，过大可能导致检索不出相关内容，过小可能导致上下文缺失
 const splitter = new RecursiveCharacterTextSplitter({
 	chunkSize: 300,
@@ -59,9 +67,7 @@ const questions = ["有几个主角，他们之间是什么关系"];
 const retrievedResult = await vectorStore.similaritySearchWithScore(questions[0], 2);
 
 // 输出对应的文档
-
 const contents = retrievedResult.map((result) => {
-	// console.log(result[0].pageContent);
 	return result[0].pageContent;
 });
 
@@ -70,7 +76,7 @@ const contents = retrievedResult.map((result) => {
 // 将文本片段和query一起发送给模型，生成答案
 const messages = [
 	new SystemMessage(`
-		你是一个老师，你会讲故事回答学生的问题， 语气会人性化，偏口语：
+		你是一个老师，你会讲一个简单的故事回答学生的问题， 语气会人性化，偏口语：
 		
 		上下文： ${contents.join("\n\n\n")}
 		`),
@@ -79,5 +85,4 @@ const messages = [
 
 // 输出答案
 const response = await chat.invoke(messages);
-
 console.log(response.content);
